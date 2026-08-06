@@ -22,3 +22,7 @@ ExportedObj/
 *.booproj
 *.pdb
 *.mdb
+.utmp/
+*.apk
+oyunumuz_BackUpThisFolder_ButDontShipItWithYourGame/
+my game_BurstDebugInformation_DoNotShip/

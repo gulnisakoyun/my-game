@@ -349,7 +349,7 @@ MonoBehaviour:
   minY: 4
   maxY: 5
   xRange: 3.925
-  player: {fileID: 0}
+  player: {fileID: 30587773}
   spawnDistanceAhead: 7
   destroyDistanceBelow: 10
 --- !u!4 &391145486
