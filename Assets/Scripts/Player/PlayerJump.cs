@@ -6,6 +6,8 @@ public class PlayerJump : MonoBehaviour
     public float jumpForce = 12f;
     public float gravityScale = 3f;
 
+    public ScoreManager scoreManager;
+
     private Rigidbody2D rb;
 
     void Start()
@@ -15,10 +17,21 @@ public class PlayerJump : MonoBehaviour
     }
 
     void OnCollisionEnter2D(Collision2D collision)
+{
+    if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Platform"))
     {
-        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Platform"))
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+
+        if (collision.gameObject.CompareTag("Platform") && scoreManager != null)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            Platform platformScript = collision.gameObject.GetComponent<Platform>();
+
+            if (platformScript != null && !platformScript.scored)
+            {
+                platformScript.scored = true;
+                scoreManager.AddPoint();
+            }
         }
     }
+}
 }
