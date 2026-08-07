@@ -5,6 +5,10 @@ public class PlatformSpawner : MonoBehaviour
 {
 
     public GameObject platformPrefab;
+    public GameObject coinPrefab;
+    [Range(0f, 1f)]
+    public float coinSpawnChance = 0.45f; // %45 ihtimalle coin cikar
+    public float coinYOffset = 0.6f; // platformun ne kadar ustune konsun
     public int platformCount = 10;
     public float minY = 1.5f;
     public float maxY = 3f;
@@ -42,6 +46,12 @@ public class PlatformSpawner : MonoBehaviour
         GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
 
         spawnedPlatforms.Add(newPlatform); // listeye ekle
+
+        if (Random.value <= coinSpawnChance)
+        {
+            Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+            Instantiate(coinPrefab, coinPosition, Quaternion.identity);
+        }
     }
 
     highestY = currentY; // en yüksek platformun Y'sini kaydet
@@ -86,5 +96,11 @@ void SpawnPlatform()
     GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
 
     spawnedPlatforms.Add(newPlatform);
+
+    if (Random.value <= coinSpawnChance)
+    {
+        Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+        Instantiate(coinPrefab, coinPosition, Quaternion.identity);
+    }
 }
 }
