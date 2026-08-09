@@ -13,6 +13,9 @@ public class PlatformSpawner : MonoBehaviour
     public float minY = 1.5f;
     public float maxY = 3f;
     public float xRange = 4f;
+    public GameObject magnetPrefab;
+    [Range(0f, 1f)]
+    public float magnetSpawnChance = 0.08f; // %8 ihtimalle magnet cikar
 
 
     public Transform player; //oyuncunun pozisyon takibi
@@ -28,8 +31,8 @@ public class PlatformSpawner : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
 {
-    float currentY = 0f; // ilk platformun başlayacağı yükseklik
-    
+    float currentY = 0f;
+
     for (int i = 0; i < platformCount; i++)
     {
         float randomX;
@@ -37,24 +40,29 @@ public class PlatformSpawner : MonoBehaviour
         {
             randomX = Random.Range(-xRange, xRange);
         } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f);
-        
-        lastPlatformX = randomX; // rastgele x
-        
-        currentY += Random.Range(minY, maxY); // her platform bir öncekinden yukarıda
+
+        lastPlatformX = randomX;
+
+        currentY += Random.Range(minY, maxY);
 
         Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
         GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
 
-        spawnedPlatforms.Add(newPlatform); // listeye ekle
+        spawnedPlatforms.Add(newPlatform);
 
-        if (Random.value <= coinSpawnChance)
+        if (Random.value <= magnetSpawnChance)
+        {
+            Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+            Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
+        }
+        else if (Random.value <= coinSpawnChance)
         {
             Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
             Instantiate(coinPrefab, coinPosition, Quaternion.identity);
         }
     }
 
-    highestY = currentY; // en yüksek platformun Y'sini kaydet
+    highestY = currentY;
 }
 
     // Update is called once per frame
@@ -97,7 +105,12 @@ void SpawnPlatform()
 
     spawnedPlatforms.Add(newPlatform);
 
-    if (Random.value <= coinSpawnChance)
+    if (Random.value <= magnetSpawnChance)
+    {
+        Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+        Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
+    }
+    else if (Random.value <= coinSpawnChance)
     {
         Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
         Instantiate(coinPrefab, coinPosition, Quaternion.identity);
