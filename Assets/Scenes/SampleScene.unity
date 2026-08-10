@@ -153,6 +153,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
+  airControlMultiplier: 1
+  mainCamera: {fileID: 519420031}
 --- !u!61 &30587770
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -315,7 +317,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerJump
   jumpForce: 15
   gravityScale: 1.5
-  scoreManager: {fileID: 1152571670}
+  maxFallSpeed: -18
 --- !u!1 &221374455
 GameObject:
   m_ObjectHideFlags: 0
