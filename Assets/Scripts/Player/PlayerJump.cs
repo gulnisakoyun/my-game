@@ -7,6 +7,8 @@ public class PlayerJump : MonoBehaviour
     public float gravityScale = 3f;
     public float maxFallSpeed = -18f; // negatif değer! çok hızlı düşmeyi engeller
 
+    public ScoreManager scoreManager;
+
     private Rigidbody2D rb;
 
     void Start()
@@ -28,6 +30,17 @@ public class PlayerJump : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Platform"))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+
+            if (collision.gameObject.CompareTag("Platform") && scoreManager != null)
+            {
+                Platform platformScript = collision.gameObject.GetComponent<Platform>();
+
+                if (platformScript != null && !platformScript.scored)
+                {
+                    platformScript.scored = true;
+                    scoreManager.AddPoint();
+                }
+            }
         }
     }
 }

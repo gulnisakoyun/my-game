@@ -5,6 +5,9 @@ public class PlatformSpawner : MonoBehaviour
 {
 
     public GameObject platformPrefab;
+    public GameObject movingPlatformPrefab;
+    [Range(0f, 1f)]
+    public float movingPlatformChance = 0.25f; // %25 ihtimalle moving platform cikar
     public GameObject coinPrefab;
     [Range(0f, 1f)]
     public float coinSpawnChance = 0.45f; // %45 ihtimalle coin cikar
@@ -16,7 +19,7 @@ public class PlatformSpawner : MonoBehaviour
     public GameObject magnetPrefab;
     [Range(0f, 1f)]
     public float magnetSpawnChance = 0.08f; // %8 ihtimalle magnet cikar
-
+    public float movingPlatformMoveDistance = 1f; // MovingPlatform.cs'teki moveDistance ile ayni olmali
 
     public Transform player; //oyuncunun pozisyon takibi
     public float spawnDistanceAhead = 7f; // oyuncunun kac birim ustune kadar platform hazır olsun
@@ -25,9 +28,9 @@ public class PlatformSpawner : MonoBehaviour
     private float highestY = 0f;
     private float lastPlatformX = 0f;
     private List<GameObject> spawnedPlatforms = new List<GameObject>();
-    
-    
-    
+
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
 {
@@ -35,18 +38,31 @@ public class PlatformSpawner : MonoBehaviour
 
     for (int i = 0; i < platformCount; i++)
     {
+        bool isMoving = Random.value <= movingPlatformChance;
+        float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
+
         float randomX;
+        int attempts = 0;
         do
         {
-            randomX = Random.Range(-xRange, xRange);
-        } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f);
+            randomX = Random.Range(-effectiveXRange, effectiveXRange);
+            attempts++;
+        } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f && attempts < 20);
 
         lastPlatformX = randomX;
 
         currentY += Random.Range(minY, maxY);
 
         Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
-        GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
+
+        GameObject prefabToSpawn = isMoving ? movingPlatformPrefab : platformPrefab;
+        GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+
+        if (isMoving)
+        {
+            MovingPlatform mp = newPlatform.GetComponent<MovingPlatform>();
+            if (mp != null) mp.moveDistance = movingPlatformMoveDistance;
+        }
 
         spawnedPlatforms.Add(newPlatform);
 
@@ -91,17 +107,30 @@ public class PlatformSpawner : MonoBehaviour
 }
 void SpawnPlatform()
 {
+    bool isMoving = Random.value <= movingPlatformChance;
+    float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
+
     float randomX;
+    int attempts = 0;
     do
     {
-        randomX = Random.Range(-xRange, xRange);
-    } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f);
+        randomX = Random.Range(-effectiveXRange, effectiveXRange);
+        attempts++;
+    } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f && attempts < 20);
 
     lastPlatformX = randomX;
     highestY += Random.Range(minY, maxY);
 
     Vector3 spawnPosition = new Vector3(randomX, highestY, 0f);
-    GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
+
+    GameObject prefabToSpawn = isMoving ? movingPlatformPrefab : platformPrefab;
+    GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+
+    if (isMoving)
+    {
+        MovingPlatform mp = newPlatform.GetComponent<MovingPlatform>();
+        if (mp != null) mp.moveDistance = movingPlatformMoveDistance;
+    }
 
     spawnedPlatforms.Add(newPlatform);
 
