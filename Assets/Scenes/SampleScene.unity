@@ -885,6 +885,9 @@ MonoBehaviour:
   platformPrefab: {fileID: 643018445099470738, guid: 37dec814e5d33844d856f54ad03843b0, type: 3}
   movingPlatformPrefab: {fileID: 643018445099470738, guid: 27f032a34d22e5d4abb37a27a6f24ed8, type: 3}
   movingPlatformChance: 0.15
+  breakingPlatformPrefab: {fileID: 7908869773884443720, guid: 1595e41daedcdd94b8228054425025bb, type: 3}
+  difficultyStartHeight: 20
+  difficultyMaxHeight: 100
   coinPrefab: {fileID: 3419493988449148530, guid: 3568b9d2b2fc86044848adb6eac63743, type: 3}
   coinSpawnChance: 0.45
   coinYOffset: 0.6
@@ -2501,6 +2504,10 @@ PrefabInstance:
     - target: {fileID: 643018445099470738, guid: 37dec814e5d33844d856f54ad03843b0, type: 3}
       propertyPath: m_Name
       value: Platform
+      objectReference: {fileID: 0}
+    - target: {fileID: 643018445099470738, guid: 37dec814e5d33844d856f54ad03843b0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

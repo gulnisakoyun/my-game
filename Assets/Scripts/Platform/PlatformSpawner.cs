@@ -8,6 +8,9 @@ public class PlatformSpawner : MonoBehaviour
     public GameObject movingPlatformPrefab;
     [Range(0f, 1f)]
     public float movingPlatformChance = 0.25f; // %25 ihtimalle moving platform cikar
+    public GameObject breakingPlatformPrefab;
+    public float difficultyStartHeight = 20f; // bu yukseklikten sonra zorluk artmaya baslasin
+    public float difficultyMaxHeight = 100f; // bu yukseklikte zorluk maksimuma ulassin
     public GameObject coinPrefab;
     [Range(0f, 1f)]
     public float coinSpawnChance = 0.45f; // %45 ihtimalle coin cikar
@@ -29,7 +32,12 @@ public class PlatformSpawner : MonoBehaviour
     private float lastPlatformX = 0f;
     private List<GameObject> spawnedPlatforms = new List<GameObject>();
 
-
+    // 0 ile 1 arasi bir deger dondurur: 0 = oyunun basi, 1 = maksimum zorluk
+    float GetDifficultyFactor(float currentHeight)
+    {
+        float t = (currentHeight - difficultyStartHeight) / (difficultyMaxHeight - difficultyStartHeight);
+        return Mathf.Clamp01(t);
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,7 +46,16 @@ public class PlatformSpawner : MonoBehaviour
 
     for (int i = 0; i < platformCount; i++)
     {
-        bool isMoving = Random.value <= movingPlatformChance;
+        currentY += Random.Range(minY, maxY);
+
+        float difficulty = GetDifficultyFactor(currentY);
+        float currentMovingChance = Mathf.Lerp(movingPlatformChance, 0.5f, difficulty);
+        float currentBreakingChance = Mathf.Lerp(0f, 0.25f, difficulty);
+
+        float roll = Random.value;
+        bool isBreaking = roll <= currentBreakingChance;
+        bool isMoving = !isBreaking && roll <= (currentBreakingChance + currentMovingChance);
+
         float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
 
         float randomX;
@@ -51,11 +68,9 @@ public class PlatformSpawner : MonoBehaviour
 
         lastPlatformX = randomX;
 
-        currentY += Random.Range(minY, maxY);
-
         Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
 
-        GameObject prefabToSpawn = isMoving ? movingPlatformPrefab : platformPrefab;
+        GameObject prefabToSpawn = isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab);
         GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
 
         if (isMoving)
@@ -107,7 +122,16 @@ public class PlatformSpawner : MonoBehaviour
 }
 void SpawnPlatform()
 {
-    bool isMoving = Random.value <= movingPlatformChance;
+    highestY += Random.Range(minY, maxY);
+
+    float difficulty = GetDifficultyFactor(highestY);
+    float currentMovingChance = Mathf.Lerp(movingPlatformChance, 0.5f, difficulty);
+    float currentBreakingChance = Mathf.Lerp(0f, 0.25f, difficulty);
+
+    float roll = Random.value;
+    bool isBreaking = roll <= currentBreakingChance;
+    bool isMoving = !isBreaking && roll <= (currentBreakingChance + currentMovingChance);
+
     float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
 
     float randomX;
@@ -119,11 +143,10 @@ void SpawnPlatform()
     } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f && attempts < 20);
 
     lastPlatformX = randomX;
-    highestY += Random.Range(minY, maxY);
 
     Vector3 spawnPosition = new Vector3(randomX, highestY, 0f);
 
-    GameObject prefabToSpawn = isMoving ? movingPlatformPrefab : platformPrefab;
+    GameObject prefabToSpawn = isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab);
     GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
 
     if (isMoving)
