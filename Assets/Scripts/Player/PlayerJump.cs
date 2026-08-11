@@ -8,6 +8,7 @@ public class PlayerJump : MonoBehaviour
     public float maxFallSpeed = -18f; // negatif değer! çok hızlı düşmeyi engeller
 
     public ScoreManager scoreManager;
+    public PlayerFeedback feedback;
 
     private Rigidbody2D rb;
 
@@ -22,6 +23,11 @@ public class PlayerJump : MonoBehaviour
         if (rb.linearVelocity.y < maxFallSpeed)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
+
+            if (feedback != null)
+            {
+                feedback.PlayBounce();
+            }
         }
     }
 

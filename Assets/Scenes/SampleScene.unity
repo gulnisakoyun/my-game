@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 30587770}
   - component: {fileID: 30587769}
   - component: {fileID: 30587774}
+  - component: {fileID: 30587775}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -319,6 +320,21 @@ MonoBehaviour:
   gravityScale: 3
   maxFallSpeed: -18
   scoreManager: {fileID: 1152571670}
+  feedback: {fileID: 30587775}
+--- !u!114 &30587775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30587768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8fa0bb3c7a03854aa41125f56713dec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFeedback
+  squashScaleY: 0.7
+  returnSpeed: 12
 --- !u!1 &221374455
 GameObject:
   m_ObjectHideFlags: 0
