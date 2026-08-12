@@ -33,6 +33,9 @@ public class PlayerJump : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        bool isTopContact = collision.contacts[0].normal.y > 0;
+        if (!isTopContact) return; // alttan/yandan carpma ise hicbir sey yapma
+
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Platform"))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);

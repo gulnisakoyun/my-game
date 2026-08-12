@@ -11,6 +11,9 @@ public class PlatformSpawner : MonoBehaviour
     public GameObject breakingPlatformPrefab;
     public float difficultyStartHeight = 20f; // bu yukseklikten sonra zorluk artmaya baslasin
     public float difficultyMaxHeight = 100f; // bu yukseklikte zorluk maksimuma ulassin
+    public GameObject mysteryPlatformPrefab;
+    [Range(0f, 1f)]
+    public float mysteryPlatformChance = 0.06f; // %6 ihtimalle mystery platform cikar
     public GameObject coinPrefab;
     [Range(0f, 1f)]
     public float coinSpawnChance = 0.45f; // %45 ihtimalle coin cikar
@@ -53,8 +56,9 @@ public class PlatformSpawner : MonoBehaviour
         float currentBreakingChance = Mathf.Lerp(0f, 0.25f, difficulty);
 
         float roll = Random.value;
-        bool isBreaking = roll <= currentBreakingChance;
-        bool isMoving = !isBreaking && roll <= (currentBreakingChance + currentMovingChance);
+        bool isMystery = roll <= mysteryPlatformChance;
+        bool isBreaking = !isMystery && roll <= (mysteryPlatformChance + currentBreakingChance);
+        bool isMoving = !isMystery && !isBreaking && roll <= (mysteryPlatformChance + currentBreakingChance + currentMovingChance);
 
         float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
 
@@ -70,7 +74,7 @@ public class PlatformSpawner : MonoBehaviour
 
         Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
 
-        GameObject prefabToSpawn = isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab);
+        GameObject prefabToSpawn = isMystery ? mysteryPlatformPrefab : (isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab));
         GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
 
         if (isMoving)
@@ -80,16 +84,18 @@ public class PlatformSpawner : MonoBehaviour
         }
 
         spawnedPlatforms.Add(newPlatform);
-
-        if (Random.value <= magnetSpawnChance)
+        if(!isMystery)
         {
-            Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-            Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
-        }
-        else if (Random.value <= coinSpawnChance)
-        {
-            Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-            Instantiate(coinPrefab, coinPosition, Quaternion.identity);
+            if (Random.value <= magnetSpawnChance)
+            {
+                Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+                Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
+            }
+            else if (Random.value <= coinSpawnChance)
+            {
+                Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+                Instantiate(coinPrefab, coinPosition, Quaternion.identity);
+            }
         }
     }
 
@@ -129,8 +135,9 @@ void SpawnPlatform()
     float currentBreakingChance = Mathf.Lerp(0f, 0.25f, difficulty);
 
     float roll = Random.value;
-    bool isBreaking = roll <= currentBreakingChance;
-    bool isMoving = !isBreaking && roll <= (currentBreakingChance + currentMovingChance);
+    bool isMystery = roll <= mysteryPlatformChance;
+    bool isBreaking = !isMystery && roll <= (mysteryPlatformChance + currentBreakingChance);
+    bool isMoving = !isMystery && !isBreaking && roll <= (mysteryPlatformChance + currentBreakingChance + currentMovingChance);
 
     float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
 
@@ -146,7 +153,7 @@ void SpawnPlatform()
 
     Vector3 spawnPosition = new Vector3(randomX, highestY, 0f);
 
-    GameObject prefabToSpawn = isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab);
+    GameObject prefabToSpawn = isMystery ? mysteryPlatformPrefab : (isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab));
     GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
 
     if (isMoving)
@@ -157,15 +164,18 @@ void SpawnPlatform()
 
     spawnedPlatforms.Add(newPlatform);
 
-    if (Random.value <= magnetSpawnChance)
-    {
-        Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-        Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
-    }
-    else if (Random.value <= coinSpawnChance)
-    {
-        Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-        Instantiate(coinPrefab, coinPosition, Quaternion.identity);
-    }
+    if(!isMystery)
+        {
+            if (Random.value <= magnetSpawnChance)
+            {
+                Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+                Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
+            }
+            else if (Random.value <= coinSpawnChance)
+            {
+                Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
+                Instantiate(coinPrefab, coinPosition, Quaternion.identity);
+            }
+        }
 }
 }

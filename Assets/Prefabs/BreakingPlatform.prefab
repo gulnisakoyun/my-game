@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2972397158580073162}
   - component: {fileID: 3082934399771087843}
   m_Layer: 0
-  m_Name: BteakingPlatform
+  m_Name: BreakingPlatform
   m_TagString: Platform
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

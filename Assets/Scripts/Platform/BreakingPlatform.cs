@@ -17,11 +17,12 @@ public class BreakingPlatform : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!triggered && collision.gameObject.CompareTag("Player"))
-        {
-            triggered = true;
-            Invoke(nameof(Crack), 0f);
-        }
+        if (triggered) return;
+        if (!collision.gameObject.CompareTag("Player")) return;
+        if (collision.transform.position.y < transform.position.y) return; // alttan geldiyse yoksay
+
+        triggered = true;
+        Invoke(nameof(Crack), 0f);
     }
 
     void Crack()
