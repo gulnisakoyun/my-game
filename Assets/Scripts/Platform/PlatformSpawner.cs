@@ -3,179 +3,358 @@ using System.Collections.Generic;
 
 public class PlatformSpawner : MonoBehaviour
 {
-
+    [Header("Platform Prefabları")]
     public GameObject platformPrefab;
     public GameObject movingPlatformPrefab;
-    [Range(0f, 1f)]
-    public float movingPlatformChance = 0.25f; // %25 ihtimalle moving platform cikar
     public GameObject breakingPlatformPrefab;
-    public float difficultyStartHeight = 20f; // bu yukseklikten sonra zorluk artmaya baslasin
-    public float difficultyMaxHeight = 100f; // bu yukseklikte zorluk maksimuma ulassin
     public GameObject mysteryPlatformPrefab;
-    [Range(0f, 1f)]
-    public float mysteryPlatformChance = 0.06f; // %6 ihtimalle mystery platform cikar
-    public GameObject coinPrefab;
-    [Range(0f, 1f)]
-    public float coinSpawnChance = 0.45f; // %45 ihtimalle coin cikar
-    public float coinYOffset = 0.6f; // platformun ne kadar ustune konsun
-    public int platformCount = 10;
-    public float minY = 1.5f;
-    public float maxY = 3f;
-    public float xRange = 4f;
-    public GameObject magnetPrefab;
-    [Range(0f, 1f)]
-    public float magnetSpawnChance = 0.08f; // %8 ihtimalle magnet cikar
-    public float movingPlatformMoveDistance = 1f; // MovingPlatform.cs'teki moveDistance ile ayni olmali
 
-    public Transform player; //oyuncunun pozisyon takibi
-    public float spawnDistanceAhead = 7f; // oyuncunun kac birim ustune kadar platform hazır olsun
-    public float destroyDistanceBelow  = 10f; // oyuncunun kac birim altındakiler silinsin
+    [Header("Platform İhtimalleri")]
+    [Range(0f, 1f)]
+    public float movingPlatformChance = 0.25f;
+
+    [Range(0f, 1f)]
+    public float mysteryPlatformChance = 0.06f;
+
+    [Header("Zorluk")]
+    public float difficultyStartHeight = 20f;
+    public float difficultyMaxHeight = 100f;
+
+    [Header("Coin")]
+    public GameObject coinPrefab;
+
+    [Range(0f, 1f)]
+    public float coinSpawnChance = 0.45f;
+
+    public float coinYOffset = 0.6f;
+
+    [Header("Magnet")]
+    public GameObject magnetPrefab;
+
+    [Range(0f, 1f)]
+    public float magnetSpawnChance = 0.075f;
+
+    [Header("Rocket")]
+    public GameObject rocketPrefab;
+
+    [Range(0f, 1f)]
+    public float rocketSpawnChance = 0.05f;
+
+    [Header("Slow Motion - Şimdilik Kapalı")]
+    public GameObject slowMotionPrefab;
+
+    [Range(0f, 1f)]
+    public float slowMotionSpawnChance = 0f;
+
+    [Header("Platform Ayarları")]
+    public int platformCount = 10;
+    public float minY = 4f;
+    public float maxY = 5f;
+    public float xRange = 3.925f;
+
+    public float movingPlatformMoveDistance = 2f;
+
+    [Header("Oyuncu")]
+    public Transform player;
+
+    public float spawnDistanceAhead = 7f;
+    public float destroyDistanceBelow = 10f;
 
     private float highestY = 0f;
     private float lastPlatformX = 0f;
-    private List<GameObject> spawnedPlatforms = new List<GameObject>();
 
-    // 0 ile 1 arasi bir deger dondurur: 0 = oyunun basi, 1 = maksimum zorluk
+    private List<GameObject> spawnedPlatforms =
+        new List<GameObject>();
+
+
     float GetDifficultyFactor(float currentHeight)
     {
-        float t = (currentHeight - difficultyStartHeight) / (difficultyMaxHeight - difficultyStartHeight);
+        float t =
+            (currentHeight - difficultyStartHeight) /
+            (difficultyMaxHeight - difficultyStartHeight);
+
         return Mathf.Clamp01(t);
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-{
-    float currentY = 0f;
 
-    for (int i = 0; i < platformCount; i++)
+    // PLATFORM ÜZERİNE COIN / MAGNET / ROCKET OLUŞTURUR
+    void SpawnPickup(float randomX, float y)
     {
-        currentY += Random.Range(minY, maxY);
+        float roll = Random.value;
 
-        float difficulty = GetDifficultyFactor(currentY);
-        float currentMovingChance = Mathf.Lerp(movingPlatformChance, 0.5f, difficulty);
-        float currentBreakingChance = Mathf.Lerp(0f, 0.25f, difficulty);
+        Vector3 pos = new Vector3(
+            randomX,
+            y + coinYOffset,
+            0f
+        );
+
+
+        // ROCKET
+        if (roll < rocketSpawnChance)
+        {
+            if (rocketPrefab != null)
+            {
+                Instantiate(
+                    rocketPrefab,
+                    pos,
+                    Quaternion.identity
+                );
+            }
+
+            return;
+        }
+
+
+        // MAGNET
+        float magnetThreshold =
+            rocketSpawnChance + magnetSpawnChance;
+
+        if (roll < magnetThreshold)
+        {
+            if (magnetPrefab != null)
+            {
+                Instantiate(
+                    magnetPrefab,
+                    pos,
+                    Quaternion.identity
+                );
+            }
+
+            return;
+        }
+
+
+        // COIN
+        float coinThreshold =
+            magnetThreshold + coinSpawnChance;
+
+        if (roll < coinThreshold)
+        {
+            if (coinPrefab != null)
+            {
+                Instantiate(
+                    coinPrefab,
+                    pos,
+                    Quaternion.identity
+                );
+            }
+
+            return;
+        }
+
+        // Slow Motion şimdilik burada KULLANILMIYOR.
+    }
+
+
+    void Start()
+    {
+        float currentY = 0f;
+
+        for (int i = 0; i < platformCount; i++)
+        {
+            currentY += Random.Range(minY, maxY);
+
+            SpawnNewPlatform(currentY);
+        }
+
+        highestY = currentY;
+    }
+
+
+    void Update()
+    {
+        // Oyuncunun önünde yeterli platform yoksa yeni platform oluştur
+        if (player != null &&
+            player.position.y + spawnDistanceAhead > highestY)
+        {
+            SpawnPlatform();
+        }
+
+
+        // Oyuncunun çok aşağısında kalan platformları sil
+        if (player != null)
+        {
+            for (int i = spawnedPlatforms.Count - 1; i >= 0; i--)
+            {
+                if (spawnedPlatforms[i] == null)
+                {
+                    spawnedPlatforms.RemoveAt(i);
+                    continue;
+                }
+
+                if (
+                    spawnedPlatforms[i].transform.position.y
+                    < player.position.y - destroyDistanceBelow
+                )
+                {
+                    Destroy(spawnedPlatforms[i]);
+                    spawnedPlatforms.RemoveAt(i);
+                }
+            }
+        }
+    }
+
+
+    void SpawnPlatform()
+    {
+        highestY += Random.Range(minY, maxY);
+
+        SpawnNewPlatform(highestY);
+    }
+
+
+    void SpawnNewPlatform(float y)
+    {
+        float difficulty = GetDifficultyFactor(y);
+
+
+        // Zorluk arttıkça moving platform ihtimali artar
+        float currentMovingChance =
+            Mathf.Lerp(
+                movingPlatformChance,
+                0.5f,
+                difficulty
+            );
+
+
+        // Zorluk arttıkça breaking platform ihtimali artar
+        float currentBreakingChance =
+            Mathf.Lerp(
+                0f,
+                0.25f,
+                difficulty
+            );
+
 
         float roll = Random.value;
-        bool isMystery = roll <= mysteryPlatformChance;
-        bool isBreaking = !isMystery && roll <= (mysteryPlatformChance + currentBreakingChance);
-        bool isMoving = !isMystery && !isBreaking && roll <= (mysteryPlatformChance + currentBreakingChance + currentMovingChance);
 
-        float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
+
+        bool isMystery =
+            roll <= mysteryPlatformChance;
+
+
+        bool isBreaking =
+            !isMystery &&
+            roll <=
+            mysteryPlatformChance +
+            currentBreakingChance;
+
+
+        bool isMoving =
+            !isMystery &&
+            !isBreaking &&
+            roll <=
+            mysteryPlatformChance +
+            currentBreakingChance +
+            currentMovingChance;
+
+
+        float effectiveXRange =
+            isMoving
+            ? Mathf.Max(
+                xRange - movingPlatformMoveDistance,
+                1.5f
+            )
+            : xRange;
+
 
         float randomX;
+
         int attempts = 0;
+
+
         do
         {
-            randomX = Random.Range(-effectiveXRange, effectiveXRange);
+            randomX =
+                Random.Range(
+                    -effectiveXRange,
+                    effectiveXRange
+                );
+
             attempts++;
-        } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f && attempts < 20);
+
+        }
+        while (
+            Mathf.Abs(randomX - lastPlatformX) < 2.15f &&
+            attempts < 20
+        );
+
 
         lastPlatformX = randomX;
 
-        Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
 
-        GameObject prefabToSpawn = isMystery ? mysteryPlatformPrefab : (isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab));
-        GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+        Vector3 spawnPosition =
+            new Vector3(
+                randomX,
+                y,
+                0f
+            );
 
+
+        GameObject prefabToSpawn;
+
+
+        if (isMystery)
+        {
+            prefabToSpawn = mysteryPlatformPrefab;
+        }
+        else if (isBreaking)
+        {
+            prefabToSpawn = breakingPlatformPrefab;
+        }
+        else if (isMoving)
+        {
+            prefabToSpawn = movingPlatformPrefab;
+        }
+        else
+        {
+            prefabToSpawn = platformPrefab;
+        }
+
+
+        if (prefabToSpawn == null)
+        {
+            Debug.LogError(
+                "PlatformSpawner: Platform prefab eksik!"
+            );
+
+            return;
+        }
+
+
+        GameObject newPlatform =
+            Instantiate(
+                prefabToSpawn,
+                spawnPosition,
+                Quaternion.identity
+            );
+
+
+        // Moving platform ayarı
         if (isMoving)
         {
-            MovingPlatform mp = newPlatform.GetComponent<MovingPlatform>();
-            if (mp != null) mp.moveDistance = movingPlatformMoveDistance;
+            MovingPlatform mp =
+                newPlatform.GetComponent<MovingPlatform>();
+
+            if (mp != null)
+            {
+                mp.moveDistance =
+                    movingPlatformMoveDistance;
+            }
         }
+
 
         spawnedPlatforms.Add(newPlatform);
-        if(!isMystery)
+
+
+        // Mystery kendi ödül sistemini kullanır.
+        // Diğer platformlar pickup alabilir.
+        if (!isMystery)
         {
-            if (Random.value <= magnetSpawnChance)
-            {
-                Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-                Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
-            }
-            else if (Random.value <= coinSpawnChance)
-            {
-                Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-                Instantiate(coinPrefab, coinPosition, Quaternion.identity);
-            }
+            SpawnPickup(
+                randomX,
+                y
+            );
         }
     }
-
-    highestY = currentY;
-}
-
-    // Update is called once per frame
-    void Update()
-{
-    // Oyuncu, en yüksek platforma yaklaştıysa yeni platform ekle
-    if (player != null && player.position.y + spawnDistanceAhead > highestY)
-    {
-        SpawnPlatform();
-    }
-
-    // Oyuncunun çok altında kalan platformları sil
-    if (player != null)
-    {
-        for (int i = spawnedPlatforms.Count - 1; i >= 0; i--)
-        {
-            if (spawnedPlatforms[i] == null) continue; // zaten silinmişse atla
-
-            if (spawnedPlatforms[i].transform.position.y < player.position.y - destroyDistanceBelow)
-            {
-                Destroy(spawnedPlatforms[i]);
-                spawnedPlatforms.RemoveAt(i);
-            }
-        }
-    }
-}
-void SpawnPlatform()
-{
-    highestY += Random.Range(minY, maxY);
-
-    float difficulty = GetDifficultyFactor(highestY);
-    float currentMovingChance = Mathf.Lerp(movingPlatformChance, 0.5f, difficulty);
-    float currentBreakingChance = Mathf.Lerp(0f, 0.25f, difficulty);
-
-    float roll = Random.value;
-    bool isMystery = roll <= mysteryPlatformChance;
-    bool isBreaking = !isMystery && roll <= (mysteryPlatformChance + currentBreakingChance);
-    bool isMoving = !isMystery && !isBreaking && roll <= (mysteryPlatformChance + currentBreakingChance + currentMovingChance);
-
-    float effectiveXRange = isMoving ? Mathf.Max(xRange - movingPlatformMoveDistance, 1.5f) : xRange;
-
-    float randomX;
-    int attempts = 0;
-    do
-    {
-        randomX = Random.Range(-effectiveXRange, effectiveXRange);
-        attempts++;
-    } while (Mathf.Abs(randomX - lastPlatformX) < 2.15f && attempts < 20);
-
-    lastPlatformX = randomX;
-
-    Vector3 spawnPosition = new Vector3(randomX, highestY, 0f);
-
-    GameObject prefabToSpawn = isMystery ? mysteryPlatformPrefab : (isBreaking ? breakingPlatformPrefab : (isMoving ? movingPlatformPrefab : platformPrefab));
-    GameObject newPlatform = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
-
-    if (isMoving)
-    {
-        MovingPlatform mp = newPlatform.GetComponent<MovingPlatform>();
-        if (mp != null) mp.moveDistance = movingPlatformMoveDistance;
-    }
-
-    spawnedPlatforms.Add(newPlatform);
-
-    if(!isMystery)
-        {
-            if (Random.value <= magnetSpawnChance)
-            {
-                Vector3 magnetPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-                Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
-            }
-            else if (Random.value <= coinSpawnChance)
-            {
-                Vector3 coinPosition = new Vector3(randomX, spawnPosition.y + coinYOffset, 0f);
-                Instantiate(coinPrefab, coinPosition, Quaternion.identity);
-            }
-        }
-}
 }

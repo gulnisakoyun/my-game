@@ -316,9 +316,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d682af4ca1d0894b9eacffa281e92f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerJump
-  jumpForce: 19.15
+  jumpForce: 19.6
   gravityScale: 3
   maxFallSpeed: -18
+  rocketDuration: 2.5
+  rocketSpeed: 20
+  averagePlatformSpacing: 4.5
+  extraJumps: 0
   scoreManager: {fileID: 1152571670}
   feedback: {fileID: 30587775}
 --- !u!114 &30587775
@@ -335,6 +339,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerFeedback
   squashScaleY: 0.7
   returnSpeed: 12
+  rocketColor: {r: 1, g: 0, b: 0, a: 1}
+  doubleJumpColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &221374455
 GameObject:
   m_ObjectHideFlags: 0
@@ -885,21 +891,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlatformSpawner
   platformPrefab: {fileID: 643018445099470738, guid: 37dec814e5d33844d856f54ad03843b0, type: 3}
   movingPlatformPrefab: {fileID: 643018445099470738, guid: 27f032a34d22e5d4abb37a27a6f24ed8, type: 3}
-  movingPlatformChance: 0.15
   breakingPlatformPrefab: {fileID: 7908869773884443720, guid: 1595e41daedcdd94b8228054425025bb, type: 3}
-  difficultyStartHeight: 20
-  difficultyMaxHeight: 100
   mysteryPlatformPrefab: {fileID: 9153157130712513825, guid: 9cf44d05de1c74d48b2998a2d0c16cfd, type: 3}
+  movingPlatformChance: 0.15
   mysteryPlatformChance: 0.1
+  difficultyStartHeight: 0
+  difficultyMaxHeight: 100
   coinPrefab: {fileID: 3419493988449148530, guid: 3568b9d2b2fc86044848adb6eac63743, type: 3}
   coinSpawnChance: 0.45
   coinYOffset: 0.6
+  magnetPrefab: {fileID: 367485206842478496, guid: 12367b259ec4616408ee795f7cd3f078, type: 3}
+  magnetSpawnChance: 0.075
+  rocketPrefab: {fileID: 3648636707685215294, guid: 183d436b1ae4e274797605fc2b8feae2, type: 3}
+  rocketSpawnChance: 0.05
+  slowMotionPrefab: {fileID: 0}
+  slowMotionSpawnChance: 0
   platformCount: 10
   minY: 4
   maxY: 5
   xRange: 3.925
-  magnetPrefab: {fileID: 367485206842478496, guid: 12367b259ec4616408ee795f7cd3f078, type: 3}
-  magnetSpawnChance: 0.075
   movingPlatformMoveDistance: 2
   player: {fileID: 30587773}
   spawnDistanceAhead: 7
@@ -1492,6 +1502,52 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.93078, y: -0.76684, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &678755647
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 678755649}
+  - component: {fileID: 678755648}
+  m_Layer: 0
+  m_Name: SlowMotionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &678755648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678755647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 709f7c71965d3074a9b60d12e1cc53e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlowMotionManager
+  duration: 10
+  slowFactor: 0.25
+--- !u!4 &678755649
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678755647}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.14333, y: 82.44959, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2719,3 +2775,4 @@ SceneRoots:
   - {fileID: 707374524}
   - {fileID: 2047313523}
   - {fileID: 1485727846}
+  - {fileID: 678755649}

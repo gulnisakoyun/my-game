@@ -19,30 +19,66 @@ public class BreakingPlatform : MonoBehaviour
     {
         if (triggered) return;
         if (!collision.gameObject.CompareTag("Player")) return;
-        if (collision.transform.position.y < transform.position.y) return; // alttan geldiyse yoksay
+
+        // Platformun üstüne gelmediyse çalışmasın.
+        bool landedOnTop = false;
+
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            if (contact.normal.y < -0.5f)
+            {
+                landedOnTop = true;
+                break;
+            }
+        }
+
+        if (!landedOnTop) return;
 
         triggered = true;
+
         Invoke(nameof(Crack), 0f);
     }
 
     void Crack()
     {
         if (this == null || gameObject == null) return;
-        if (sr != null) sr.color = crackColor;
-        Invoke(nameof(Break), crackDelay);
+
+        if (sr != null)
+        {
+            sr.color = crackColor;
+        }
+
+        float delay = crackDelay;
+
+        if (SlowMotionManager.Instance != null)
+        {
+            delay = SlowMotionManager.Instance.GetDelay(crackDelay);
+        }
+
+        Invoke(nameof(Break), delay);
     }
 
     void Break()
     {
         if (this == null || gameObject == null) return;
+
         rb = gameObject.AddComponent<Rigidbody2D>();
         rb.gravityScale = 3f;
-        Invoke(nameof(Vanish), fallDelay);
+
+        float delay = fallDelay;
+
+        if (SlowMotionManager.Instance != null)
+        {
+            delay = SlowMotionManager.Instance.GetDelay(fallDelay);
+        }
+
+        Invoke(nameof(Vanish), delay);
     }
 
     void Vanish()
     {
         if (this == null || gameObject == null) return;
+
         Destroy(gameObject);
     }
 }

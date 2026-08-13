@@ -5,6 +5,8 @@ public class MysteryPlatform : MonoBehaviour
     [Header("Odul Prefablari")]
     public GameObject coinPrefab;
     public GameObject magnetPrefab;
+    public GameObject rocketPrefab;
+    public GameObject slowMotionPrefab;
 
     [Header("Odul Ayarlari")]
     public float rewardYOffset = 0.6f;
@@ -23,35 +25,98 @@ public class MysteryPlatform : MonoBehaviour
     {
         if (triggered) return;
         if (!collision.gameObject.CompareTag("Player")) return;
-        if (collision.transform.position.y < transform.position.y) return; // alttan geldiyse yoksay
+
+        // Platform scriptinde collision normalinin yönü ters olduğu
+        // için üstten gelmeyi -0.5 ile kontrol ediyoruz.
+        bool landedOnTop = false;
+
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            if (contact.normal.y < -0.5f)
+            {
+                landedOnTop = true;
+                break;
+            }
+        }
+
+        if (!landedOnTop) return;
 
         triggered = true;
+
         GiveRandomReward();
         StartCoroutine(PulseAnimation());
     }
 
     void GiveRandomReward()
     {
-        int rewardIndex = Random.Range(0, 2);
+        int rewardIndex = Random.Range(0, 4);
 
-        if (rewardIndex == 0)
+        switch (rewardIndex)
         {
-            GiveCoins();
+            case 0:
+                GiveCoins();
+                break;
+
+            case 1:
+                if (magnetPrefab != null)
+                {
+                    Instantiate(
+                        magnetPrefab,
+                        GetRewardPosition(),
+                        Quaternion.identity
+                    );
+                }
+                break;
+
+            case 2:
+                if (rocketPrefab != null)
+                {
+                    Instantiate(
+                        rocketPrefab,
+                        GetRewardPosition(),
+                        Quaternion.identity
+                    );
+                }
+                break;
+
+            case 3:
+                if (slowMotionPrefab != null)
+                {
+                    Instantiate(
+                        slowMotionPrefab,
+                        GetRewardPosition(),
+                        Quaternion.identity
+                    );
+                }
+                break;
         }
-        else
-        {
-            Vector3 magnetPosition = transform.position + new Vector3(0f, rewardYOffset, 0f);
-            Instantiate(magnetPrefab, magnetPosition, Quaternion.identity);
-        }
+    }
+
+    Vector3 GetRewardPosition()
+    {
+        return transform.position +
+               new Vector3(0f, rewardYOffset, 0f);
     }
 
     void GiveCoins()
     {
+        if (coinPrefab == null) return;
+
         for (int i = 0; i < coinRewardAmount; i++)
         {
-            float xOffset = (i - (coinRewardAmount - 1) / 2f) * coinSpreadX;
-            Vector3 coinPosition = transform.position + new Vector3(xOffset, rewardYOffset, 0f);
-            Instantiate(coinPrefab, coinPosition, Quaternion.identity);
+            float xOffset =
+                (i - (coinRewardAmount - 1) / 2f)
+                * coinSpreadX;
+
+            Vector3 coinPosition =
+                transform.position +
+                new Vector3(xOffset, rewardYOffset, 0f);
+
+            Instantiate(
+                coinPrefab,
+                coinPosition,
+                Quaternion.identity
+            );
         }
     }
 
@@ -64,15 +129,30 @@ public class MysteryPlatform : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            transform.localScale = Vector3.Lerp(originalScale, bigScale, elapsed / duration);
+
+            transform.localScale =
+                Vector3.Lerp(
+                    originalScale,
+                    bigScale,
+                    elapsed / duration
+                );
+
             yield return null;
         }
 
         elapsed = 0f;
+
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            transform.localScale = Vector3.Lerp(bigScale, originalScale, elapsed / duration);
+
+            transform.localScale =
+                Vector3.Lerp(
+                    bigScale,
+                    originalScale,
+                    elapsed / duration
+                );
+
             yield return null;
         }
 
