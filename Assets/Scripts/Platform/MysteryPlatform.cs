@@ -12,6 +12,12 @@ public class MysteryPlatform : MonoBehaviour
     public float coinSpreadX = 0.5f;
 
     private bool triggered = false;
+    private Vector3 originalScale;
+
+    void Awake()
+    {
+        originalScale = transform.localScale;
+    }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -21,6 +27,7 @@ public class MysteryPlatform : MonoBehaviour
 
         triggered = true;
         GiveRandomReward();
+        StartCoroutine(PulseAnimation());
     }
 
     void GiveRandomReward()
@@ -46,5 +53,29 @@ public class MysteryPlatform : MonoBehaviour
             Vector3 coinPosition = transform.position + new Vector3(xOffset, rewardYOffset, 0f);
             Instantiate(coinPrefab, coinPosition, Quaternion.identity);
         }
+    }
+
+    System.Collections.IEnumerator PulseAnimation()
+    {
+        Vector3 bigScale = originalScale * 1.3f;
+        float duration = 0.15f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.localScale = Vector3.Lerp(originalScale, bigScale, elapsed / duration);
+            yield return null;
+        }
+
+        elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.localScale = Vector3.Lerp(bigScale, originalScale, elapsed / duration);
+            yield return null;
+        }
+
+        transform.localScale = originalScale;
     }
 }

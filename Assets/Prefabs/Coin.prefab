@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6085622532840375873}
   - component: {fileID: 371564470480791943}
   - component: {fileID: 2729653410354353635}
+  - component: {fileID: 1764616403135282320}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Coin
@@ -142,3 +143,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa918da0a917d8f4298867600b7bb0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinCollect
+--- !u!114 &1764616403135282320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3419493988449148530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9932ce1b30eb1343a43264c03101583, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PopInEffect
+  duration: 0.2

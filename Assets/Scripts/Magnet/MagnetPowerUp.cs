@@ -9,7 +9,16 @@ public class MagnetPowerUp : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             MagnetEffect.Instance.ActivateMagnet(magnetDuration);
-            Destroy(gameObject); // magnet toplanınca kaybolsun
+
+            PlayerFeedback feedback = other.GetComponent<PlayerFeedback>();
+            if (feedback != null)
+            {
+                feedback.PlayBounce();
+            }
+
+            FloatingText.Create("Magnet!", transform.position, Color.magenta);
+
+            Destroy(gameObject);
         }
     }
 }
