@@ -9,6 +9,9 @@ public class BreakingPlatform : MonoBehaviour
     private bool triggered = false;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
+    private float adjustedCrackDelay;
+    private float adjustedFallDelay;
+    private float capturedSlowFactor = 1f; // YENİ: Break() içinde de kullanabilmek için field'a alındı
 
     void Awake()
     {
@@ -19,22 +22,13 @@ public class BreakingPlatform : MonoBehaviour
     {
         if (triggered) return;
         if (!collision.gameObject.CompareTag("Player")) return;
-
-        // Platformun üstüne gelmediyse çalışmasın.
-        bool landedOnTop = false;
-
-        foreach (ContactPoint2D contact in collision.contacts)
-        {
-            if (contact.normal.y < -0.5f)
-            {
-                landedOnTop = true;
-                break;
-            }
-        }
-
-        if (!landedOnTop) return;
+        if (collision.transform.position.y < transform.position.y) return;
 
         triggered = true;
+
+        capturedSlowFactor = (SlowMotionManager.Instance != null) ? SlowMotionManager.Instance.CurrentFactor : 1f;
+        adjustedCrackDelay = crackDelay / capturedSlowFactor;
+        adjustedFallDelay = fallDelay / capturedSlowFactor;
 
         Invoke(nameof(Crack), 0f);
     }
@@ -42,43 +36,21 @@ public class BreakingPlatform : MonoBehaviour
     void Crack()
     {
         if (this == null || gameObject == null) return;
-
-        if (sr != null)
-        {
-            sr.color = crackColor;
-        }
-
-        float delay = crackDelay;
-
-        if (SlowMotionManager.Instance != null)
-        {
-            delay = SlowMotionManager.Instance.GetDelay(crackDelay);
-        }
-
-        Invoke(nameof(Break), delay);
+        if (sr != null) sr.color = crackColor;
+        Invoke(nameof(Break), adjustedCrackDelay);
     }
 
     void Break()
     {
         if (this == null || gameObject == null) return;
-
         rb = gameObject.AddComponent<Rigidbody2D>();
-        rb.gravityScale = 3f;
-
-        float delay = fallDelay;
-
-        if (SlowMotionManager.Instance != null)
-        {
-            delay = SlowMotionManager.Instance.GetDelay(fallDelay);
-        }
-
-        Invoke(nameof(Vanish), delay);
+        rb.gravityScale = 3f * capturedSlowFactor; // YENİ: düşüş de slow motion'a uyuyor
+        Invoke(nameof(Vanish), adjustedFallDelay);
     }
 
     void Vanish()
     {
         if (this == null || gameObject == null) return;
-
         Destroy(gameObject);
     }
 }

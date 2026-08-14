@@ -4,64 +4,55 @@ public class SlowMotionManager : MonoBehaviour
 {
     public static SlowMotionManager Instance;
 
-    [Header("Slow Motion Ayarları")]
-    public float duration = 10f;
-    
-    // 1 = normal hız
-    // 0.25 = normalin %25'i
+    public float slowMotionDuration = 10f;
+    [Range(0.05f, 1f)]
     public float slowFactor = 0.25f;
+
+    public UnityEngine.UI.Image slowMotionIndicator; // YENİ
+    public float blinkSpeed = 5f;                    // YENİ
+
+    public bool IsActive { get; private set; }
+    public float CurrentFactor => IsActive ? slowFactor : 1f;
 
     private float timer = 0f;
 
-    public bool IsActive => timer > 0f;
-
-    private void Awake()
+    void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         Instance = this;
     }
 
-    private void Update()
+    void Update()
     {
-        if (timer > 0f)
+        if (!IsActive)
         {
-            timer -= Time.deltaTime;
+            if (slowMotionIndicator != null && slowMotionIndicator.gameObject.activeSelf)
+                slowMotionIndicator.gameObject.SetActive(false);
+            return;
+        }
 
-            if (timer <= 0f)
-            {
-                timer = 0f;
-            }
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
+        {
+            IsActive = false;
+            return;
+        }
+
+        // YENİ: Magnet ile aynı blink mantığı
+        if (slowMotionIndicator != null)
+        {
+            if (!slowMotionIndicator.gameObject.activeSelf)
+                slowMotionIndicator.gameObject.SetActive(true);
+
+            float alpha = Mathf.PingPong(Time.time * blinkSpeed, 1f);
+            Color c = slowMotionIndicator.color;
+            c.a = alpha;
+            slowMotionIndicator.color = c;
         }
     }
 
     public void Activate()
     {
-        timer = duration;
-    }
-
-    public float GetSpeed(float normalSpeed)
-    {
-        if (!IsActive)
-            return normalSpeed;
-
-        return normalSpeed * slowFactor;
-    }
-
-    public float GetDelay(float normalDelay)
-    {
-        if (!IsActive)
-            return normalDelay;
-
-        return normalDelay / slowFactor;
-    }
-
-    public float GetRemainingTime()
-    {
-        return timer;
+        IsActive = true;
+        timer = slowMotionDuration;
     }
 }

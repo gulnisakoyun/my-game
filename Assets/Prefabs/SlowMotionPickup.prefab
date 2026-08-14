@@ -11,12 +11,11 @@ GameObject:
   - component: {fileID: 2874306435746648129}
   - component: {fileID: 2262615220568808346}
   - component: {fileID: 2165757604316103881}
-  - component: {fileID: 3346977169338596831}
   - component: {fileID: 5561582903519926735}
   - component: {fileID: -7330855095012723663}
   - component: {fileID: -8356407661923061553}
   m_Layer: 0
-  m_Name: SlowMotion
+  m_Name: SlowMotionPickup
   m_TagString: Coin
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -133,18 +132,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &3346977169338596831
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 111473978581890405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa918da0a917d8f4298867600b7bb0fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CoinCollect
 --- !u!114 &5561582903519926735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,8 +157,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 709f7c71965d3074a9b60d12e1cc53e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoubleJumpPickup
-  duration: 10
+  slowMotionDuration: 10
   slowFactor: 0.25
+  slowMotionIndicator: {fileID: 0}
+  blinkSpeed: 5
 --- !u!114 &-8356407661923061553
 MonoBehaviour:
   m_ObjectHideFlags: 0

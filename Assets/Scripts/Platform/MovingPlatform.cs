@@ -8,6 +8,7 @@ public class MovingPlatform : MonoBehaviour
     private Vector3 startPosition;
     private Transform playerOnPlatform;
     private Vector3 lastPosition;
+    private float movementTimer = 0f;
 
     void Start()
     {
@@ -17,7 +18,10 @@ public class MovingPlatform : MonoBehaviour
 
     void Update()
     {
-        float offset = Mathf.PingPong(Time.time * moveSpeed, moveDistance * 2) - moveDistance;
+        float slowFactor = (SlowMotionManager.Instance != null) ? SlowMotionManager.Instance.CurrentFactor : 1f;
+
+        movementTimer += Time.deltaTime * moveSpeed * slowFactor;
+        float offset = Mathf.PingPong(movementTimer, moveDistance * 2) - moveDistance;
         transform.position = new Vector3(startPosition.x + offset, startPosition.y, startPosition.z);
 
         if (playerOnPlatform != null)
@@ -31,10 +35,10 @@ public class MovingPlatform : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            playerOnPlatform = collision.transform;
-        }
+        if (!collision.gameObject.CompareTag("Player")) return;
+        if (collision.transform.position.y < transform.position.y) return;
+
+        playerOnPlatform = collision.transform;
     }
 
     void OnCollisionExit2D(Collision2D collision)

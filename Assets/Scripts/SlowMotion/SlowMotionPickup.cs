@@ -2,38 +2,33 @@ using UnityEngine;
 
 public class SlowMotionPickup : MonoBehaviour
 {
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player"))
-            return;
-
-        if (SlowMotionManager.Instance == null)
-        {
-            Debug.LogError("SlowMotionManager bulunamadi!");
-            return;
-        }
-
-        SlowMotionManager.Instance.Activate();
-
-        Debug.Log("SLOW MOTION AKTIF! 10 saniye.");
-
-        Destroy(gameObject);
+        Debug.Log("TRIGGER: " + other.gameObject.name + " tag=" + other.tag);
+        TryActivate(other.gameObject);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!collision.gameObject.CompareTag("Player"))
-            return;
+        Debug.Log("COLLISION: " + collision.gameObject.name + " tag=" + collision.gameObject.tag);
+        TryActivate(collision.gameObject);
+    }
 
-        if (SlowMotionManager.Instance == null)
+    void TryActivate(GameObject obj)
+    {
+        if (!obj.CompareTag("Player"))
         {
-            Debug.LogError("SlowMotionManager bulunamadi!");
+            Debug.Log("Player değil, çıkıldı: " + obj.name);
             return;
         }
 
-        SlowMotionManager.Instance.Activate();
+        Debug.Log("Player doğrulandı. Manager instance null mu? " + (SlowMotionManager.Instance == null));
 
-        Debug.Log("SLOW MOTION AKTIF! 10 saniye.");
+        if (SlowMotionManager.Instance != null)
+        {
+            SlowMotionManager.Instance.Activate();
+            Debug.Log("Activate() çağrıldı. IsActive şimdi: " + SlowMotionManager.Instance.IsActive);
+        }
 
         Destroy(gameObject);
     }

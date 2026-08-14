@@ -12,9 +12,6 @@ public class PlayerJump : MonoBehaviour
     public float rocketSpeed = 20f;
     public float averagePlatformSpacing = 4.5f;
 
-    [Header("Double Jump Ayarları")]
-    public int extraJumps = 0;
-
     public ScoreManager scoreManager;
     public PlayerFeedback feedback;
 
@@ -31,19 +28,17 @@ public class PlayerJump : MonoBehaviour
         col = GetComponent<Collider2D>();
 
         rb.gravityScale = gravityScale;
-
-        // Oyun başladığında Player'ın ilk zıplamasını garanti et.
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
     }
 
     void Update()
     {
-        // =========================
-        // ROCKET
-        // =========================
+        // Rocket aktifken yukarı doğru uç
         if (rocketActive)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rocketSpeed);
+            rb.linearVelocity = new Vector2(
+                rb.linearVelocity.x,
+                rocketSpeed
+            );
 
             rocketTimer -= Time.deltaTime;
 
@@ -55,46 +50,31 @@ public class PlayerJump : MonoBehaviour
             return;
         }
 
-        // =========================
-        // MAX FALL SPEED
-        // =========================
+        // Maksimum düşme hızını sınırla
         if (rb.linearVelocity.y < maxFallSpeed)
         {
             rb.linearVelocity = new Vector2(
                 rb.linearVelocity.x,
                 maxFallSpeed
             );
-        }
-
-        // =========================
-        // DOUBLE JUMP
-        // =========================
-        if (extraJumps > 0 && Input.GetMouseButtonDown(0))
-        {
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                jumpForce
-            );
-
-            extraJumps--;
 
             if (feedback != null)
             {
-                feedback.PlayDoubleJump();
+                feedback.PlayBounce();
             }
         }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // Sadece Ground veya Platform ile ilgileniyoruz.
+        // Sadece Ground veya Platform ile ilgileniyoruz
         if (!collision.gameObject.CompareTag("Ground") &&
             !collision.gameObject.CompareTag("Platform"))
         {
             return;
         }
 
-        // Gerçekten platformun ÜSTÜNE indiğimizi kontrol et.
+        // Gerçekten platformun/zeminin ÜSTÜNE indi mi?
         bool landedOnTop = false;
 
         foreach (ContactPoint2D contact in collision.contacts)
@@ -106,48 +86,33 @@ public class PlayerJump : MonoBehaviour
             }
         }
 
-        // Platformun yanına veya altına çarptıysak zıplama.
+        // Üstüne inmediysen zıplama
         if (!landedOnTop)
         {
             return;
         }
 
-        // =========================
-        // NORMAL OTOMATİK ZIPLAMA
-        // =========================
+        // OTOMATİK ZIPLAMA
         rb.linearVelocity = new Vector2(
             rb.linearVelocity.x,
             jumpForce
         );
 
-        // =========================
-        // SKOR
-        // =========================
+        // Platformdan puan al
         if (collision.gameObject.CompareTag("Platform") &&
             scoreManager != null)
         {
             Platform platformScript =
                 collision.gameObject.GetComponent<Platform>();
 
-            if (platformScript != null && !platformScript.scored)
+            if (platformScript != null &&
+                !platformScript.scored)
             {
                 platformScript.scored = true;
                 scoreManager.AddPoint();
             }
         }
-
-        // =========================
-        // FEEDBACK
-        // =========================
-        if (feedback != null)
-        {
-            feedback.PlayBounce();
-        }
     }
-
-    // =========================
-    // ROCKET
-    // =========================
 
     public void GrantRocket()
     {
@@ -160,7 +125,6 @@ public class PlayerJump : MonoBehaviour
 
         rb.gravityScale = 0f;
 
-        // Rocket sırasında platformlarla fiziksel çarpışmayı kapat.
         if (col != null)
         {
             col.isTrigger = true;
@@ -203,14 +167,5 @@ public class PlayerJump : MonoBehaviour
         {
             feedback.PlayRocketEnd();
         }
-    }
-
-    // =========================
-    // DOUBLE JUMP
-    // =========================
-
-    public void GrantDoubleJump()
-    {
-        extraJumps = 1;
     }
 }

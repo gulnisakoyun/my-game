@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1947043525570502063}
   - component: {fileID: 6998820398785853652}
   - component: {fileID: 8473904213967869445}
-  - component: {fileID: 75035683004148131}
   - component: {fileID: 7025921340285004208}
   - component: {fileID: 8347437714839035028}
   m_Layer: 0
@@ -132,18 +131,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &75035683004148131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3648636707685215294}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa918da0a917d8f4298867600b7bb0fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CoinCollect
 --- !u!114 &7025921340285004208
 MonoBehaviour:
   m_ObjectHideFlags: 0
