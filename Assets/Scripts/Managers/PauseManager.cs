@@ -9,6 +9,8 @@ public class PauseManager : MonoBehaviour
 
     public void TogglePause()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return; // Game Over ise pause acilmasin
+
         isPaused = !isPaused;
         Time.timeScale = isPaused ? 0f : 1f;
 

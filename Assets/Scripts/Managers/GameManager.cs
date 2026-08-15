@@ -7,26 +7,24 @@ public class GameManager : MonoBehaviour
     [Header("Referanslar")]
     public Transform player;
     public Camera mainCamera;
+    public GameObject gameOverPanel; // Gul'un Gun 6'da ekleyecegi panel, simdilik bos birakilabilir
 
     [Header("Ayarlar")]
-    public float fallThreshold = 2f; // Kameranın altına ne kadar inince Game Over olsun
+    public float fallThreshold = 2f;
 
-    private bool isGameOver = false;
+    public bool IsGameOver { get; private set; } = false;
 
     void Awake()
     {
-        // Bu GameManager'dan sahnede sadece bir tane olmasını garantiler
         Instance = this;
     }
 
     void Update()
     {
-        if (isGameOver) return;
+        if (IsGameOver) return;
 
-        // Kameranın alt sınırını hesapla
         float cameraBottomEdge = mainCamera.transform.position.y - mainCamera.orthographicSize;
 
-        // Oyuncu bu sınırın altına indiyse Game Over
         if (player.position.y < cameraBottomEdge - fallThreshold)
         {
             GameOver();
@@ -35,18 +33,31 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        if (isGameOver) return;
+        if (IsGameOver) return;
 
-        isGameOver = true;
+        IsGameOver = true;
         Debug.Log("GAME OVER!");
-        Time.timeScale = 0f; // Oyunu tamamen durdurur (her şey donar)
+        Time.timeScale = 0f;
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
     }
 
     public void RestartGame()
     {
-        Time.timeScale = 1f; // Zamanı normale döndür
+        IsGameOver = false;
+        Time.timeScale = 1f;
         UnityEngine.SceneManagement.SceneManager.LoadScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
         );
+    }
+
+    public void GoToMainMenu()
+    {
+        IsGameOver = false;
+        Time.timeScale = 1f;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 }
