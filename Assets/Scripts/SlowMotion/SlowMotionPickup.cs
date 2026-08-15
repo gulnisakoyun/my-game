@@ -28,6 +28,14 @@ public class SlowMotionPickup : MonoBehaviour
         {
             SlowMotionManager.Instance.Activate();
             Debug.Log("Activate() çağrıldı. IsActive şimdi: " + SlowMotionManager.Instance.IsActive);
+            
+            PlayerFeedback feedback = obj.GetComponent<PlayerFeedback>();
+            if (feedback != null)
+            {
+                feedback.PlayDoubleJump();
+            }
+
+            FloatingText.Create("Slow Motion!", obj.transform.position, Color.cyan);
         }
 
         Destroy(gameObject);
