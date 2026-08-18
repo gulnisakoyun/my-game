@@ -14,11 +14,13 @@ public class CoinCollect : MonoBehaviour
                 for (int i = 0; i < comboCount; i++)
                 {
                     CoinManager.Instance.AddCoin();
+                    ScoreManager.Instance.AddCoin();
                 }
             }
             else
             {
                 CoinManager.Instance.AddCoin();
+                ScoreManager.Instance.AddCoin();
             }
 
             Destroy(gameObject);
