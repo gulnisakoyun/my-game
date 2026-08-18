@@ -6,7 +6,6 @@ public class MysteryPlatform : MonoBehaviour
     public GameObject coinPrefab;
     public GameObject magnetPrefab;
     public GameObject rocketPrefab;
-    public GameObject slowMotionPrefab;
 
     [Header("Odul Ayarlari")]
     public float rewardYOffset = 0.6f;
@@ -34,7 +33,8 @@ public class MysteryPlatform : MonoBehaviour
 
     void GiveRandomReward()
     {
-        int rewardIndex = Random.Range(0, 4);
+        // Artık 4 yerine 3'e kadar zar atıyor (0, 1 veya 2 üretecek)
+        int rewardIndex = Random.Range(0, 3);
 
         switch (rewardIndex)
         {
@@ -46,9 +46,6 @@ public class MysteryPlatform : MonoBehaviour
                 break;
             case 2:
                 Instantiate(rocketPrefab, GetRewardPosition(), Quaternion.identity);
-                break;
-            case 3:
-                Instantiate(slowMotionPrefab, GetRewardPosition(), Quaternion.identity);
                 break;
         }
     }

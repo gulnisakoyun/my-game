@@ -3,34 +3,25 @@ using System.Collections.Generic;
 
 public class PlatformSpawner : MonoBehaviour
 {
-
     public GameObject platformPrefab;
     public GameObject movingPlatformPrefab;
-    [Range(0f, 1f)]
-    public float movingPlatformChance = 0.25f;
+    [Range(0f, 1f)] public float movingPlatformChance = 0.25f;
     public GameObject breakingPlatformPrefab;
     public float difficultyStartHeight = 20f;
     public float difficultyMaxHeight = 100f;
     public GameObject mysteryPlatformPrefab;
-    [Range(0f, 1f)]
-    public float mysteryPlatformChance = 0.06f;
+    [Range(0f, 1f)] public float mysteryPlatformChance = 0.06f;
     public GameObject coinPrefab;
-    [Range(0f, 1f)]
-    public float coinSpawnChance = 0.45f;
+    [Range(0f, 1f)] public float coinSpawnChance = 0.45f;
     public float coinYOffset = 0.6f;
     public int platformCount = 10;
     public float minY = 1.5f;
     public float maxY = 3f;
     public float xRange = 4f;
     public GameObject magnetPrefab;
-    [Range(0f, 1f)]
-    public float magnetSpawnChance = 0.08f;
+    [Range(0f, 1f)] public float magnetSpawnChance = 0.08f;
     public GameObject rocketPrefab;
-    [Range(0f, 1f)]
-    public float rocketSpawnChance = 0.02f;
-    public GameObject slowMotionPrefab;
-    [Range(0f, 1f)]
-    public float slowMotionSpawnChance = 0.02f; // 0 = hic spawn olmaz, 1 = her uygun platformda cikar
+    [Range(0f, 1f)] public float rocketSpawnChance = 0.02f;
     public float movingPlatformMoveDistance = 1f;
 
     public Transform player;
@@ -47,40 +38,36 @@ public class PlatformSpawner : MonoBehaviour
         return Mathf.Clamp01(t);
     }
 
-    // Coin/Magnet/Rocket'tan sadece birini, tek zar atisiyla, birbirini dislayarak spawn eder (DEGISMEDI)
-    void SpawnPickup(float randomX, float y)
+    // Eşyayı oluştururken artık parentPlatform'u (üzerinde çıktığı platformu) alıyoruz
+    void SpawnPickup(Transform parentPlatform, float y)
     {
         float pickupRoll = Random.value;
         float rocketThreshold = rocketSpawnChance;
         float magnetThreshold = rocketThreshold + magnetSpawnChance;
         float coinThreshold = magnetThreshold + coinSpawnChance;
 
-        Vector3 pos = new Vector3(randomX, y + coinYOffset, 0f);
+        Vector3 pos = new Vector3(parentPlatform.position.x, y + coinYOffset, 0f);
+        GameObject spawnedPickup = null;
 
         if (pickupRoll <= rocketThreshold)
         {
-            Instantiate(rocketPrefab, pos, Quaternion.identity);
+            spawnedPickup = Instantiate(rocketPrefab, pos, Quaternion.identity);
         }
         else if (pickupRoll <= magnetThreshold)
         {
-            Instantiate(magnetPrefab, pos, Quaternion.identity);
+            spawnedPickup = Instantiate(magnetPrefab, pos, Quaternion.identity);
         }
         else if (pickupRoll <= coinThreshold)
         {
-            Instantiate(coinPrefab, pos, Quaternion.identity);
+            spawnedPickup = Instantiate(coinPrefab, pos, Quaternion.identity);
         }
-    }
 
-    // Slow Motion, digerlerinden BAGIMSIZ, kendi zar atisiyla spawn olur.
-    // chance = 0 -> hicbir zaman, chance = 1 -> her seferinde
-    void TrySpawnSlowMotion(float randomX, float y)
-    {
-        if (slowMotionPrefab == null) return;
-        if (slowMotionSpawnChance <= 0f) return;
-        if (slowMotionSpawnChance >= 1f || Random.value <= slowMotionSpawnChance)
+        // Eğer bir eşya oluştuysa, yassılaşmasın diye Child YAPMIYORUZ.
+        // Onun yerine sihirli Takipçi (PickupFollower) scriptimizi veriyoruz:
+        if (spawnedPickup != null)
         {
-            Vector3 pos = new Vector3(randomX, y + coinYOffset, 0f);
-            Instantiate(slowMotionPrefab, pos, Quaternion.identity);
+            PickupFollower follower = spawnedPickup.AddComponent<PickupFollower>();
+            follower.target = parentPlatform;
         }
     }
 
@@ -128,8 +115,7 @@ public class PlatformSpawner : MonoBehaviour
 
             if (!isMystery)
             {
-                SpawnPickup(randomX, currentY);
-                TrySpawnSlowMotion(randomX, currentY);
+                SpawnPickup(newPlatform.transform, currentY);
             }
         }
 
@@ -198,8 +184,37 @@ public class PlatformSpawner : MonoBehaviour
 
         if (!isMystery)
         {
-            SpawnPickup(randomX, highestY);
-            TrySpawnSlowMotion(randomX, highestY);
+            SpawnPickup(newPlatform.transform, highestY);
+        }
+    }
+}
+
+// YENİ EKLENEN KISIM: Eşyaların yassılaşmadan platformu takip etmesini sağlayan kod
+public class PickupFollower : MonoBehaviour
+{
+    public Transform target;
+    private Vector3 offset;
+
+    void Start()
+    {
+        // Doğduğu an platformla arasındaki mesafeyi ölç ve hafızaya al
+        if (target != null)
+        {
+            offset = transform.position - target.position;
+        }
+    }
+
+    void Update()
+    {
+        if (target != null)
+        {
+            // O mesafeyi koruyarak platformla beraber hareket et
+            transform.position = target.position + offset;
+        }
+        else
+        {
+            // Eğer platform ekranın aşağısında kalıp silindiyse, eşya da havada asılı kalmasın, kendini silsin
+            Destroy(gameObject);
         }
     }
 }

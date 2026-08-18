@@ -63,6 +63,14 @@ public class MagnetEffect : MonoBehaviour
                 if (col.CompareTag("Coin") && !pulledCoins.Contains(col.transform))
                 {
                     pulledCoins.Add(col.transform);
+                    
+                    // EKLENEN KISIM: Altını platforma bağlayan Takipçi (PickupFollower) kodunu yok et!
+                    // Böylece altın platformu takip etmeyi bırakıp sana doğru gelebilir.
+                    PickupFollower follower = col.GetComponent<PickupFollower>();
+                    if (follower != null)
+                    {
+                        Destroy(follower);
+                    }
                 }
             }
         }

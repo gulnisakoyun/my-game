@@ -18,9 +18,9 @@ public class MovingPlatform : MonoBehaviour
 
     void Update()
     {
-        float slowFactor = (SlowMotionManager.Instance != null) ? SlowMotionManager.Instance.CurrentFactor : 1f;
-
-        movementTimer += Time.deltaTime * moveSpeed * slowFactor;
+        // Slow motion kalıntısı temizlendi
+        movementTimer += Time.deltaTime * moveSpeed;
+        
         float offset = Mathf.PingPong(movementTimer, moveDistance * 2) - moveDistance;
         transform.position = new Vector3(startPosition.x + offset, startPosition.y, startPosition.z);
 

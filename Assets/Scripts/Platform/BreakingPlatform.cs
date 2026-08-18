@@ -9,9 +9,6 @@ public class BreakingPlatform : MonoBehaviour
     private bool triggered = false;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-    private float adjustedCrackDelay;
-    private float adjustedFallDelay;
-    private float capturedSlowFactor = 1f; // YENİ: Break() içinde de kullanabilmek için field'a alındı
 
     void Awake()
     {
@@ -26,10 +23,6 @@ public class BreakingPlatform : MonoBehaviour
 
         triggered = true;
 
-        capturedSlowFactor = (SlowMotionManager.Instance != null) ? SlowMotionManager.Instance.CurrentFactor : 1f;
-        adjustedCrackDelay = crackDelay / capturedSlowFactor;
-        adjustedFallDelay = fallDelay / capturedSlowFactor;
-
         Invoke(nameof(Crack), 0f);
     }
 
@@ -37,15 +30,19 @@ public class BreakingPlatform : MonoBehaviour
     {
         if (this == null || gameObject == null) return;
         if (sr != null) sr.color = crackColor;
-        Invoke(nameof(Break), adjustedCrackDelay);
+        
+        // Slow motion hesabı kaldırıldı, orijinal delay kullanılıyor
+        Invoke(nameof(Break), crackDelay); 
     }
 
     void Break()
     {
         if (this == null || gameObject == null) return;
         rb = gameObject.AddComponent<Rigidbody2D>();
-        rb.gravityScale = 3f * capturedSlowFactor; // YENİ: düşüş de slow motion'a uyuyor
-        Invoke(nameof(Vanish), adjustedFallDelay);
+        rb.gravityScale = 3f; // Çarpan kaldırıldı, orijinal hızına döndü
+        
+        // Slow motion hesabı kaldırıldı, orijinal delay kullanılıyor
+        Invoke(nameof(Vanish), fallDelay); 
     }
 
     void Vanish()
