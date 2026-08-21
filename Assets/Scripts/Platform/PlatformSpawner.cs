@@ -38,7 +38,6 @@ public class PlatformSpawner : MonoBehaviour
         return Mathf.Clamp01(t);
     }
 
-    // Eşyayı oluştururken artık parentPlatform'u (üzerinde çıktığı platformu) alıyoruz
     void SpawnPickup(Transform parentPlatform, float y)
     {
         float pickupRoll = Random.value;
@@ -62,8 +61,6 @@ public class PlatformSpawner : MonoBehaviour
             spawnedPickup = Instantiate(coinPrefab, pos, Quaternion.identity);
         }
 
-        // Eğer bir eşya oluştuysa, yassılaşmasın diye Child YAPMIYORUZ.
-        // Onun yerine sihirli Takipçi (PickupFollower) scriptimizi veriyoruz:
         if (spawnedPickup != null)
         {
             PickupFollower follower = spawnedPickup.AddComponent<PickupFollower>();
@@ -189,18 +186,18 @@ public class PlatformSpawner : MonoBehaviour
     }
 }
 
-// YENİ EKLENEN KISIM: Eşyaların yassılaşmadan platformu takip etmesini sağlayan kod
+// Eşyaların yassılaşmadan platformu TAM MERKEZDEN takip etmesini sağlayan güncel kod
 public class PickupFollower : MonoBehaviour
 {
     public Transform target;
-    private Vector3 offset;
+    private float yOffset; // Artık sadece Y eksenindeki boşluğu tutuyoruz
 
     void Start()
     {
-        // Doğduğu an platformla arasındaki mesafeyi ölç ve hafızaya al
         if (target != null)
         {
-            offset = transform.position - target.position;
+            // Sadece Y farkını al, X'i alma ki hep ortada kalsın
+            yOffset = transform.position.y - target.position.y;
         }
     }
 
@@ -208,12 +205,15 @@ public class PickupFollower : MonoBehaviour
     {
         if (target != null)
         {
-            // O mesafeyi koruyarak platformla beraber hareket et
-            transform.position = target.position + offset;
+            // X ekseninde direkt platformun ortasına (target.position.x) kilitlen
+            transform.position = new Vector3(
+                target.position.x, 
+                target.position.y + yOffset, 
+                transform.position.z
+            );
         }
         else
         {
-            // Eğer platform ekranın aşağısında kalıp silindiyse, eşya da havada asılı kalmasın, kendini silsin
             Destroy(gameObject);
         }
     }
